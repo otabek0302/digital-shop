@@ -1,0 +1,35 @@
+{
+  "name": "shop",
+  "version": "1.0.0",
+  "description": "It is eCommerce webapp done by otabek0302",
+  "main": "./backend/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node backend/index.js",
+    "dev": "nodemon backend/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/otabek0302/digital-shop.git"
+  },
+  "keywords": [
+    "ecommerce-app"
+  ],
+  "author": "Amonov Otabek (otabek0302)",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/otabek0302/digital-shop/issues"
+  },
+  "homepage": "https://github.com/otabek0302/digital-shop#readme",
+  "dependencies": {
+    "bcrypt": "^5.1.0",
+    "body-parser": "^1.20.2",
+    "cookie-parser": "^1.4.6",
+    "dotenv": "^16.0.3",
+    "express": "^4.18.2",
+    "express-async-handler": "^1.2.0",
+    "jsonwebtoken": "^9.0.0",
+    "mongoose": "^7.0.0",
+    "nodemon": "^2.0.20"
+  }
+}
