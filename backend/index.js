@@ -8,6 +8,7 @@ const cookieParser = require('cookie-parser');
 
 // import routes
 const user = require('./routes/userRoute');
+const product = require('./routes/productRoute')
 
 
 app.use(bodyParser.json())
@@ -25,6 +26,7 @@ createConnect()
 // ------------------------------------------------------ //
 // user routes useages
 app.use('/api/user', user)
+app.use('/api/product', product)
 
 
 
