@@ -11,38 +11,39 @@ var productSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    lowercase: true
+    lowercase: true,
   },
   description: {
     type: String,
-    required: true
+    required: true,
   },
   price: {
     type: Number,
-    required: true
+    required: true,
   },
   category: {
-     type: mongoose.Schema.Types.ObjectId,
-     ref: "Category",
+     type: String,
+     required: true,
   },
   brand: {
      type: String,
-     enum: ["Apple", "Samsung", "Lenovo"],
+     required: true,
   },
   quantity: {
       type: Number,
-      require: true
+      require: true,
    },
   sold: {
      type: Number,
      default: 0,
+   //   select: false, if you want to hide this form users
   },
   images: {
      type: Array,
   },
   color: {
      type: String,
-     enum: ['Black', 'Brown', 'Red'],
+     required: true,
   },
   ratings: [{
      star: Number,
