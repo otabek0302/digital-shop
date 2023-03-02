@@ -10,6 +10,7 @@ const morgan = require('morgan')
 // import routes
 const user = require('./routes/userRoute');
 const product = require('./routes/productRoute')
+const blog = require('./routes/blogRoute')
 
 // It is npm packet for showing routes and requests name
 app.use(morgan("dev"))
@@ -30,6 +31,7 @@ createConnect()
 // user routes useages
 app.use('/api/user', user)
 app.use('/api/product', product)
+app.use('/api/blog', blog)
 
 
 
