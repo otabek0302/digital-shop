@@ -14,6 +14,7 @@ const blog = require('./routes/blogRoute')
 const category = require('./routes/categoryRoute')
 const blogCategory = require('./routes/blogCategRoute')
 const brand = require('./routes/brandRoute')
+const coupon = require('./routes/couponRoute')
 
 // It is npm packet for showing routes and requests name
 app.use(morgan("dev"))
@@ -32,13 +33,14 @@ createConnect()
 
 // ------------------------------------------------------ //
 // user routes useages
-app.use('/api/user', user)
-app.use('/api/product', product)
-app.use('/api/blog', blog)
-app.use('/api/category', category)
-app.use('/api/blog-category', blogCategory)
-app.use('/api/brand', brand)
-app.use('/api/brand', brand)
+app.use('/api/user', user);
+app.use('/api/product', product);
+app.use('/api/blog', blog);
+app.use('/api/category', category);
+app.use('/api/blog-category', blogCategory);
+app.use('/api/brand', brand);
+app.use('/api/coupon', coupon);
+ 
 
 
 
