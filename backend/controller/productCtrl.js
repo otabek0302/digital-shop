@@ -107,7 +107,7 @@ const addToWishList = asyncHandler(async (req, res) => {
   const { productId } = req.body
   try {
     const user = await User.findById(_id)
-    const alreadyAdded = user.wishlist.find((id) => id.toString() === productId)
+    const alreadyAdded = user.wishlist.find(id => id.toString() === productId)
     if (alreadyAdded) {
       let user = await User.findByIdAndUpdate(
         _id,
@@ -135,11 +135,71 @@ const addToWishList = asyncHandler(async (req, res) => {
     throw new Error(error)
   }
 })
+
+// add rating in product
+const rating = asyncHandler(async (req, res) => {
+  const { _id } = req.user
+  const { star, productId } = req.body
+  try {
+    const product = await Product.findById(productId)
+    let alreadyRated = product.ratings.find(
+      userId => userId.postedby.toString() === _id.toString()
+    )
+    if (alreadyRated) {
+      const updateRating = await Product.updateOne(
+        {
+          ratings: { $elemMatch: alreadyRated }
+        },
+        {
+          $set: { 'ratings.$.star': star }
+        },
+        {
+          new: true
+        }
+      )
+      res.json(updateRating)
+    } else {
+      const rateProduct = await Product.findByIdAndUpdate(
+        productId,
+        {
+          $push: {
+            ratings: {
+              star: star,
+              postedby: _id
+            }
+          }
+        },
+        {
+          new: true
+        }
+      )
+      res.json(rateProduct)
+    }
+    const getallratings = await Product.findById(productId)
+    let totalRating = getallratings.ratings.length
+    let ratingsum = getallratings.ratings
+      .map(item => item.star)
+      .reduce((prev, curr) => prev + curr, 0)
+    let actualRating = Math.round(ratingsum / totalRating)
+    let finalproduct = await Product.findByIdAndUpdate(
+      productId,
+      {
+        totalRating: actualRating
+      },
+      { new: true }
+    )
+    res.json(finalproduct)
+  } catch (error) {
+    throw new Error(error)
+  }
+})
+
 module.exports = {
   createProduct,
   getSingleProduct,
   getAllProducts,
   updateProduct,
   deleteProduct,
-  addToWishList
+  addToWishList,
+  rating
 }

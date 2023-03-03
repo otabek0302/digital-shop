@@ -1,7 +1,7 @@
 const express = require('express');
 const router = express.Router();
 const {isAuthenticated, isAdmin } = require('../middleware/auth');
-const { createProduct, getSingleProduct, getAllProducts, updateProduct, deleteProduct, addToWishList } = require('../controller/productCtrl');
+const { createProduct, getSingleProduct, getAllProducts, updateProduct, deleteProduct, addToWishList, rating } = require('../controller/productCtrl');
 
 // Create Product  ----- Admin
 router.post('/',isAuthenticated, isAdmin, createProduct);
@@ -11,6 +11,9 @@ router.get('/', getAllProducts)
 
 //Add Product to User wishlist 
 router.put('/wishlist', isAuthenticated, addToWishList)
+
+// Add Start to Product
+router.put('/rating', isAuthenticated, rating)
 
 //Get Single Product  ----- Admin
 router.get('/:id',isAuthenticated, isAdmin, getSingleProduct)
