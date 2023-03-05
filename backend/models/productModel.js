@@ -39,9 +39,7 @@ var productSchema = new mongoose.Schema(
       default: 0
       //   select: false, if you want to hide this form users
     },
-    images: {
-      type: Array
-    },
+    images: [],
     color: {
       type: String,
       required: true

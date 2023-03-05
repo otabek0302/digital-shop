@@ -38,10 +38,7 @@ var blogSchema = new mongoose.Schema({
       ref: 'User'
     }
   ],
-  image:{
-    type: String,
-    default: 'https://neilpatel.com/wp-content/uploads/2017/09/5-Common-Blogging-Mistakes-And-How-to-Fix-Them.jpg'
-  },
+  images:[],
   author: {
     type: String,
     default: 'Admin',
