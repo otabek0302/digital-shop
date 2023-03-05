@@ -2,7 +2,7 @@ const asyncHandler = require('express-async-handler')
 const sendMail = require('../utils/sendMail')
 const validateMongodbId = require('../utils/validateMongodbId')
 const { generateToken, refreshUserToken } = require('../middleware/jwtToken')
-const crypto = require('crypto');
+const crypto = require('crypto')
 const JWT = require('jsonwebtoken')
 const User = require('../models/userModel')
 
@@ -62,63 +62,109 @@ const loginUser = asyncHandler(async (req, res) => {
   }
 })
 
+/// Login Admin
+const loginAdmin = asyncHandler(async (req, res) => {
+  const { email, password } = req.body
+
+  // check is there any data in input
+  if (!email || !password) {
+    return new Error('Please enter your Email & password')
+  }
+
+  // check if user exists or not
+  const findAdmin = await User.findOne({ email: email })
+
+  if (findAdmin.role !== 'admin') throw new Error('You are not Admin')
+  if (findAdmin && (await findAdmin.isPasswordMatched(password))) {
+    // set a token in cookie for recognizing -> * Start
+    const refreshToken = await refreshUserToken(findAdmin?._id)
+    const updateadmin = await User.findByIdAndUpdate(
+      findAdmin.id,
+      {
+        refreshToken: refreshToken
+      },
+      {
+        new: true
+      }
+    )
+    res.cookie('refreshToken', refreshToken, {
+      httpOnly: true,
+      maxAge: 72 * 60 * 60 * 1000
+    })
+    // set a token in cookie for recognizing -> * End
+    res.json({
+      _id: findAdmin?._id,
+      firstname: findAdmin?.firstname,
+      lastname: findAdmin?.lastname,
+      email: findAdmin?.email,
+      mobile: findAdmin?.mobile,
+      token: generateToken(findAdmin?._id)
+    })
+  } else {
+    // if user is not
+    throw new Error('User is not found with this email & password')
+  }
+})
+
 // Logout from Profile
-const logoutUser = asyncHandler(async (req,res) => {
-    const cookie = req.cookies;
-    if (!cookie?.refreshToken) throw new Error('No Refresh Token in Cookies');
-    const refreshToken = cookie.refreshToken;
-    const user = await User.findOne({ refreshToken })
-    if (!user) {
-        res.clearCookie("refreshToken", {
-            httpOnly: true,
-            secure: true,
-        })
-        return  res.sendStatus(204); //forbitten
-    }
-    await User.findOneAndUpdate(refreshToken, {
-        refreshToken: "",
-    });
-    res.clearCookie("refreshToken", {
-        httpOnly: true,
-        secure: true,
-    });
-    res.sendStatus(204) // forbitten
+const logoutUser = asyncHandler(async (req, res) => {
+  const cookie = req.cookies
+  if (!cookie?.refreshToken) throw new Error('No Refresh Token in Cookies')
+  const refreshToken = cookie.refreshToken
+  const user = await User.findOne({ refreshToken })
+  if (!user) {
+    res.clearCookie('refreshToken', {
+      httpOnly: true,
+      secure: true
+    })
+    return res.sendStatus(204) //forbitten
+  }
+  await User.findOneAndUpdate(refreshToken, {
+    refreshToken: ''
+  })
+  res.clearCookie('refreshToken', {
+    httpOnly: true,
+    secure: true
+  })
+  res.sendStatus(204) // forbitten
 })
 
 // Reset User's password
 const updatePassword = asyncHandler(async (req, res) => {
-  const { _id } = req.user;
-  const { password } = req.body;
+  const { _id } = req.user
+  const { password } = req.body
   validateMongodbId(_id)
 
   const user = await User.findById(_id)
   if (password) {
-    user.password = password;
-    const updatePassword = await user.save();
+    user.password = password
+    const updatePassword = await user.save()
     res.json(updatePassword)
-  }else{
+  } else {
     res.json(user)
   }
 })
 
 // Forgot Password and reset it
-const forgotPassword = asyncHandler(async (req,res) => {
-  const { email } = req.body;
+const forgotPassword = asyncHandler(async (req, res) => {
+  const { email } = req.body
   const user = await User.findOne({ email })
 
-  if (!user) throw new Error('User not found with thid email');
+  if (!user) throw new Error('User not found with thid email')
 
   try {
     // Get ResetPassword Token
-    const token = await user.createPasswordResetToken();
-    await user.save();
-    
-    const resetUrl  = `Hi, Please follow this link to reset your Password. Your password reset token is : <a href='${req.protocol}://${req.get('host')}/api/user/reset-password/${token}'>Click Here</a> `
+    const token = await user.createPasswordResetToken()
+    await user.save()
+
+    const resetUrl = `Hi, Please follow this link to reset your Password. Your password reset token is : <a href='${
+      req.protocol
+    }://${req.get('host')}/api/user/reset-password/${token}'>Click Here</a> `
     await sendMail({
       email: email,
       text: 'Hey User',
       subject: `User Password Recovery`,
-      html: resetUrl,
+      html: resetUrl
     })
 
     res.status(200).json({
@@ -129,38 +175,38 @@ const forgotPassword = asyncHandler(async (req,res) => {
   }
 })
 
-// Reset Password 
-const resetPassword = asyncHandler(async (req,res) => {
-  const { password } = req.body;
-  const { token } = req.params;
-  const hashedToken = crypto.createHash('sha256').update(token).digest('hex');
+// Reset Password
+const resetPassword = asyncHandler(async (req, res) => {
+  const { password } = req.body
+  const { token } = req.params
+  const hashedToken = crypto.createHash('sha256').update(token).digest('hex')
   const user = await User.findOne({
     passwordResetToken: hashedToken,
-    passwordResetExpires: { $gt: Date.now() },
-  });
-  if(!user) throw new Error('Token Expired, Please try again leter !');
-  user.password = password;
-  user.passwordResetToken = undefined;
-  user.passwordResetExpires = undefined;
-  await user.save();
+    passwordResetExpires: { $gt: Date.now() }
+  })
+  if (!user) throw new Error('Token Expired, Please try again leter !')
+  user.password = password
+  user.passwordResetToken = undefined
+  user.passwordResetExpires = undefined
+  await user.save()
   res.json(user)
 })
 
 // handle refresh token for ---
 const handleRefreshToken = asyncHandler(async (req, res) => {
-    const cookie = req.cookies;
-    if (!cookie?.refreshToken) throw new Error('No Refresh Token in Cookies');
-    const refreshToken = cookie.refreshToken;
-    const user = await User.findOne({ refreshToken })
-    if(!user) throw new Error('There was a Error in Data Base with User');
-    JWT.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
-        if (err || user.id !== decoded.id) {
-            throw new Error('There is something wrong with refresh token')
-        }
-        const accessToken = generateToken(user?._id);
-        res.json({ accessToken })
-    })
-    res.json(user)
+  const cookie = req.cookies
+  if (!cookie?.refreshToken) throw new Error('No Refresh Token in Cookies')
+  const refreshToken = cookie.refreshToken
+  const user = await User.findOne({ refreshToken })
+  if (!user) throw new Error('There was a Error in Data Base with User')
+  JWT.verify(refreshToken, process.env.JWT_SECRET, (err, decoded) => {
+    if (err || user.id !== decoded.id) {
+      throw new Error('There is something wrong with refresh token')
+    }
+    const accessToken = generateToken(user?._id)
+    res.json({ accessToken })
+  })
+  res.json(user)
 })
 
 // Update User
@@ -175,6 +221,33 @@ const updateUser = asyncHandler(async (req, res) => {
       mobile: req?.body?.mobile
     })
     res.json(updatedUser)
+  } catch (error) {
+    throw new Error(error)
+  }
+})
+
+// Save Address of User
+const saveAddress = asyncHandler(async (req, res, next) => {
+  const { _id } = req.user
+  validateMongodbId(_id)
+  try {
+    const saveAddressUser = await User.findByIdAndUpdate(_id, {
+      address: req?.body?.address,
+    })
+    res.json(saveAddressUser)
+  } catch (error) {
+    throw new Error(error)
+  }
+})
+
+// Get Wishlist
+const getWishList = asyncHandler(async (req, res) => {
+  const { _id } = req.user
+  validateMongodbId(_id)
+
+  try {
+    const wishlist = await User.findById(_id).populate('wishlist')
+    res.json(wishlist)
   } catch (error) {
     throw new Error(error)
   }
@@ -266,6 +339,12 @@ const unBlockUser = asyncHandler(async (req, res) => {
     throw new Error(error)
   }
 })
+
+// 
+const userCart = asyncHandler(async (req,res) => {
+    res.json("hello")
+})
+
 module.exports = {
   createUser,
   loginUser,
@@ -280,4 +359,8 @@ module.exports = {
   updatePassword,
   forgotPassword,
   resetPassword,
+  loginAdmin,
+  getWishList,
+  saveAddress,
+  userCart
 }
