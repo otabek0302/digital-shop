@@ -13,8 +13,10 @@ const product = require('./routes/productRoute')
 const blog = require('./routes/blogRoute')
 const category = require('./routes/categoryRoute')
 const blogCategory = require('./routes/blogCategRoute')
+const color = require('./routes/colorRoute')
 const brand = require('./routes/brandRoute')
 const coupon = require('./routes/couponRoute')
+const enqRouter = require('./routes/enqRoute')
 
 // It is npm packet for showing routes and requests name
 app.use(morgan("dev"))
@@ -40,6 +42,8 @@ app.use('/api/category', category);
 app.use('/api/blog-category', blogCategory);
 app.use('/api/brand', brand);
 app.use('/api/coupon', coupon);
+app.use('/api/color', color);
+app.use('/api/enquiry', enqRouter);
  
 
 

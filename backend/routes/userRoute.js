@@ -1,6 +1,6 @@
 const express = require('express');
 const router = express.Router();
-const { createUser, loginUser, getAllUsers, getSingleUser, deleteUser, updateUser, blockUser, unBlockUser, handleRefreshToken, logoutUser, updatePassword, forgotPassword, resetPassword, loginAdmin, getWishList, saveAddress, userCart, getUserCart, emptyCart, applyCoupon } = require('../controller/userCtrl');
+const { createUser, loginUser, getAllUsers, getSingleUser, deleteUser, updateUser, blockUser, unBlockUser, handleRefreshToken, logoutUser, updatePassword, forgotPassword, resetPassword, loginAdmin, getWishList, saveAddress, userCart, getUserCart, emptyCart, applyCoupon, createOrder, getOrders, updateOrderStatus } = require('../controller/userCtrl');
 const {isAuthenticated, isAdmin } = require('../middleware/auth');
 
 
@@ -44,6 +44,10 @@ router.put('/save-address', isAuthenticated, saveAddress)
 // Apply Coupon 
 router.post('/cart/applycoupon', isAuthenticated, applyCoupon)
 
+// Create Order Route User
+router.post('/cart/cash-order', isAuthenticated, createOrder);
+router.get('/get-orders', isAuthenticated, getOrders);
+
 // Admin Controller Functions -*-*--*-*--*-*--*-*--*-*-
 
 // Get All Users ----- Admin
@@ -53,6 +57,9 @@ router.get('/:id', isAuthenticated, isAdmin, getSingleUser)
 
 // Delete User
 router.delete('/:id', isAuthenticated, isAdmin, deleteUser)
+
+// Update Order Status
+router.put('/order/update-order/:id', isAuthenticated, isAdmin, updateOrderStatus)
 
 // Blocked User
 router.put('/block-user/:id', isAuthenticated, isAdmin, blockUser)

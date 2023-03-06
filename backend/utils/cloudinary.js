@@ -15,19 +15,40 @@ cloudinary.config({
 })
 
 // Uploading Image
-const cloudinaryUploadImage = asyncHandler(async fileToUploads => {
-  return new Promise(resolve => {
+const cloudinaryUploadImage = asyncHandler(async (fileToUploads, folderName) => {
+  return new Promise((resolve) => {
     cloudinary.uploader.upload(fileToUploads, result => {
       resolve(
         {
             url: result.secure_url,
+            asset_id: result.asset_id,
+            public_id: result.public_id
         },
         {
-            resource_type: "auto",
-        }
+          resource_type: "auto",
+          folder: folderName
+      }
       )
     })
   })
 })
 
-module.exports = cloudinaryUploadImage;
+const cloudinaryDeleteImage = asyncHandler(async (fileToDelete) => {
+  return new Promise((resolve) => {
+    cloudinary.uploader.destroy(fileToDelete, result => {
+      resolve(
+        {
+            url: result.secure_url,
+            asset_id: result.asset_id,
+            public_id: result.public_id
+        },
+        {
+          resource_type: "auto",
+          folder: folderName
+      }
+      )
+    })
+  })
+})
+
+module.exports = {cloudinaryUploadImage, cloudinaryDeleteImage}

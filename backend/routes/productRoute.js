@@ -9,22 +9,25 @@ const {
   deleteProduct,
   addToWishList,
   rating,
-  uploadImages
+  uploadImages,
+  deleteImages
 } = require('../controller/productCtrl')
-const { uploadPhoto, productImgResize } = require('../middleware/uploadImages')
+const { uploadPhoto } = require('../middleware/uploadImages')
 
 // Create Product  ----- Admin
 router.post('/', isAuthenticated, isAdmin, createProduct)
 
 // Upload images in Product
 router.put(
-  '/upload/:id',
+  '/upload',
   isAuthenticated,
   isAdmin,
   uploadPhoto.array('images', 10),
-  productImgResize,
   uploadImages  
 )
+
+// Delete Images
+router.delete('/delete-img/:id', isAuthenticated, isAdmin, deleteImages)
 
 //Get All Products
 router.get('/', getAllProducts)
